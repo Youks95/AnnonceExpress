@@ -173,30 +173,41 @@
 		$bdd = new mysqli("localhost","root","","annonce_express");
 
 		function selectAllAnnonce($bdd)
-		{
-			$select = "select * from annonce";
-			$stmt = $bdd->prepare($select);
-			$stmt->execute();
-			$lesResultats = $stmt->get_result();
-			return $lesResultats;
-		}
+{
+    //requete
+    $select = "select * from annonce";
+    //preparer la requete
+    $stmt = $bdd->prepare($select);
+    //executer la requete
+    $stmt->execute();
+    $lesResultats = $stmt->get_result();
 
-		function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
-		{
-			$insert = "insert into annonce values(null,?,?,?,?,?)";
-			$stmt = $bdd->prepare($insert);
-			$stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
-			$stmt->execute();
-			header("Location: http://localhost/AnnonceExpress/index.php");
-		}
+    return $lesResultats;
+}
 
-		function deleteAnnonce($bdd, $id)
-		{
-			$delete = "delete from annonce where idannonce=?";
-			$stmt = $bdd->prepare($delete);
-			$stmt->bind_param("i", $id);
-			$stmt->execute();
-		}
+function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
+{
+    //requete
+    $insert = "insert into annonce values(null,?,?,?,?,?)";
+    //preparer la requete
+    $stmt = $bdd->prepare($insert);
+    $stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
+    //executer la requete
+    $stmt->execute();
+
+    header("Location: http://localhost/AnnonceExpress/index.php");
+}
+
+function deleteAnnonce($bdd, $id)
+{
+    //requete
+    $delete = "delete from annonce where idannonce=?";
+    //preparer la requete
+    $stmt = $bdd->prepare($delete);
+    $stmt->bind_param("i", $id);
+    //executer la requete
+    $stmt->execute();
+}
 
 		if (isset($_GET['action']) && $_GET['action'] == "suppr") {
 			$id = $_GET['id'];
