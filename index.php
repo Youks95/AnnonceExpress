@@ -9,22 +9,22 @@
 			margin: 0;
 			padding: 0;
 			box-sizing: border-box;
-			font-family: Arial, sans-serif;
+			font-family: 'Segoe UI', Arial, sans-serif;
 		}
 
 		body {
-			background-color: #f5f5f5;
-			color: #333;
+			background-color: #f7f8fa;
+			color: #1f2937;
 		}
 
 		header {
 			background-color: #fff;
 			padding: 20px 40px;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+			box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 		}
 
 		header h1 {
-			color: #e74c3c;
+			color: #ff6b4a;
 			font-size: 28px;
 		}
 
@@ -37,25 +37,36 @@
 		.formulaire {
 			background-color: #fff;
 			padding: 25px;
-			border-radius: 8px;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+			border-radius: 10px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 			margin-bottom: 30px;
+			border: 1px solid #e5e7eb;
 		}
 
 		.formulaire h2 {
 			margin-bottom: 20px;
-			color: #e74c3c;
+			color: #1f2937;
+			font-size: 20px;
 		}
 
 		.formulaire input[type="text"],
 		.formulaire input[type="number"],
 		.formulaire textarea {
 			width: 100%;
-			padding: 10px;
+			padding: 11px;
 			margin-bottom: 12px;
-			border: 1px solid #ddd;
-			border-radius: 5px;
+			border: 1px solid #e5e7eb;
+			border-radius: 6px;
 			font-size: 14px;
+			background-color: #fafafa;
+		}
+
+		.formulaire input[type="text"]:focus,
+		.formulaire input[type="number"]:focus,
+		.formulaire textarea:focus {
+			outline: none;
+			border-color: #ff6b4a;
+			background-color: #fff;
 		}
 
 		.formulaire textarea {
@@ -64,22 +75,24 @@
 		}
 
 		.formulaire input[type="submit"] {
-			background-color: #e74c3c;
+			background-color: #ff6b4a;
 			color: #fff;
 			border: none;
-			padding: 10px 25px;
-			border-radius: 5px;
+			padding: 11px 28px;
+			border-radius: 6px;
 			cursor: pointer;
 			font-size: 15px;
+			font-weight: bold;
 		}
 
 		.formulaire input[type="submit"]:hover {
-			background-color: #c0392b;
+			background-color: #e8552f;
 		}
 
 		h2.titre-liste {
 			margin-bottom: 20px;
-			color: #333;
+			color: #1f2937;
+			font-size: 20px;
 		}
 
 		.grille {
@@ -90,15 +103,22 @@
 
 		.carte {
 			background-color: #fff;
-			border-radius: 8px;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+			border-radius: 10px;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 			overflow: hidden;
+			border: 1px solid #e5e7eb;
+			transition: box-shadow 0.2s;
+		}
+
+		.carte:hover {
+			box-shadow: 0 4px 14px rgba(0,0,0,0.1);
 		}
 
 		.carte img {
 			width: 100%;
 			height: 180px;
 			object-fit: cover;
+			background-color: #f0f0f0;
 		}
 
 		.carte-info {
@@ -108,26 +128,28 @@
 		.carte-info h3 {
 			font-size: 16px;
 			margin-bottom: 5px;
+			color: #1f2937;
 		}
 
 		.carte-info p {
 			font-size: 13px;
-			color: #777;
+			color: #6b7280;
 			margin-bottom: 8px;
 		}
 
 		.carte-info .prix {
 			font-size: 18px;
 			font-weight: bold;
-			color: #e74c3c;
-			margin-bottom: 5px;
+			color: #ff6b4a;
+			margin-bottom: 8px;
 		}
 
 		.carte-info .categorie {
 			display: inline-block;
-			background-color: #f0f0f0;
-			padding: 3px 8px;
-			border-radius: 10px;
+			background-color: #eef2ff;
+			color: #4338ca;
+			padding: 3px 10px;
+			border-radius: 12px;
 			font-size: 12px;
 			margin-bottom: 10px;
 		}
@@ -135,29 +157,30 @@
 		.carte-actions {
 			display: flex;
 			gap: 10px;
-			padding: 10px 15px;
-			border-top: 1px solid #eee;
+			padding: 12px 15px;
+			border-top: 1px solid #f0f0f0;
 		}
 
 		.carte-actions a {
 			text-decoration: none;
-			padding: 6px 12px;
-			border-radius: 5px;
+			padding: 6px 14px;
+			border-radius: 6px;
 			font-size: 13px;
+			font-weight: 500;
 		}
 
 		.btn-suppr {
-			background-color: #fee;
-			color: #e74c3c;
+			background-color: #fee2e2;
+			color: #dc2626;
 		}
 
 		.btn-modif {
-			background-color: #eef;
-			color: #3498db;
+			background-color: #dbeafe;
+			color: #2563eb;
 		}
 
-		.btn-suppr:hover { background-color: #fdd; }
-		.btn-modif:hover { background-color: #dde; }
+		.btn-suppr:hover { background-color: #fecaca; }
+		.btn-modif:hover { background-color: #bfdbfe; }
 	</style>
 </head>
 <body>
@@ -173,41 +196,41 @@
 		$bdd = new mysqli("localhost","root","","annonce_express");
 
 		function selectAllAnnonce($bdd)
-{
-    //requete
-    $select = "select * from annonce";
-    //preparer la requete
-    $stmt = $bdd->prepare($select);
-    //executer la requete
-    $stmt->execute();
-    $lesResultats = $stmt->get_result();
+		{
+			//requete
+			$select = "select * from annonce";
+			//preparer la requete
+			$stmt = $bdd->prepare($select);
+			//executer la requete
+			$stmt->execute();
+			$lesResultats = $stmt->get_result();
 
-    return $lesResultats;
-}
+			return $lesResultats;
+		}
 
-function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
-{
-    //requete
-    $insert = "insert into annonce values(null,?,?,?,?,?)";
-    //preparer la requete
-    $stmt = $bdd->prepare($insert);
-    $stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
-    //executer la requete
-    $stmt->execute();
+		function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
+		{
+			//requete
+			$insert = "insert into annonce values(null,?,?,?,?,?)";
+			//preparer la requete
+			$stmt = $bdd->prepare($insert);
+			$stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
+			//executer la requete
+			$stmt->execute();
 
-    header("Location: http://localhost/AnnonceExpress/index.php");
-}
+			header("Location: http://localhost/AnnonceExpress/index.php");
+		}
 
-function deleteAnnonce($bdd, $id)
-{
-    //requete
-    $delete = "delete from annonce where idannonce=?";
-    //preparer la requete
-    $stmt = $bdd->prepare($delete);
-    $stmt->bind_param("i", $id);
-    //executer la requete
-    $stmt->execute();
-}
+		function deleteAnnonce($bdd, $id)
+		{
+			//requete
+			$delete = "delete from annonce where idannonce=?";
+			//preparer la requete
+			$stmt = $bdd->prepare($delete);
+			$stmt->bind_param("i", $id);
+			//executer la requete
+			$stmt->execute();
+		}
 
 		if (isset($_GET['action']) && $_GET['action'] == "suppr") {
 			$id = $_GET['id'];
@@ -268,7 +291,7 @@ function deleteAnnonce($bdd, $id)
 				</div>
 				<div class="carte-actions">
 					<a class="btn-suppr" href="index.php?action=suppr&id=' . $unResultat["idannonce"] . '">Supprimer</a>
-					<a class="btn-modif" href="modifier.php?action=modif&id=' . $unResultat["idannonce"] . '&titre=' . $unResultat["titre"] . '&description=' . $unResultat["description"] . '&prix=' . $unResultat["prix"] . '&categorie=' . $unResultat["categorie"] . '">Modifier</a>
+					<a class="btn-modif" href="modifier.php?action=modif&id=' . $unResultat["idannonce"] . '&titre=' . $unResultat["titre"] . '&description=' . $unResultat["description"] . '&prix=' . $unResultat["prix"] . '&categorie=' . $unResultat["categorie"] . '&photo=' . $unResultat["photo"] . '">Modifier</a>
 				</div>
 			</div>';
 		}
