@@ -47,11 +47,12 @@
 	}
 
 	if (isset($_POST['poster'])) {
-		$titre = $_POST['titre'];
-		$description = $_POST['description'];
-		$prix = $_POST['prix'];
-		$categorie = $_POST['categorie'];
+	$titre = $_POST['titre'];
+	$description = $_POST['description'];
+	$prix = $_POST['prix'];
+	$categorie = $_POST['categorie'];
 
+	if (!empty($_FILES['photo']['name'])) {
 		$photoname = basename($_FILES['photo']['name']);
 		$dossier = 'images/';
 
@@ -61,11 +62,13 @@
 
 		$destination = $dossier . $photoname;
 		move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
-
-		insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination);
-		exit();
+	} else {
+		$destination = null;
 	}
 
+	insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination);
+	exit();
+}
 	$lesResultats = selectAllAnnonce($bdd);
 
 ?>
