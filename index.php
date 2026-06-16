@@ -1,3 +1,74 @@
+<?php
+
+	$bdd = new mysqli("localhost","root","","annonce_express");
+
+	function selectAllAnnonce($bdd)
+	{
+		//requete
+		$select = "select * from annonce";
+		//preparer la requete
+		$stmt = $bdd->prepare($select);
+		//executer la requete
+		$stmt->execute();
+		$lesResultats = $stmt->get_result();
+
+		return $lesResultats;
+	}
+
+	function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
+	{
+		//requete
+		$insert = "insert into annonce values(null,?,?,?,?,?)";
+		//preparer la requete
+		$stmt = $bdd->prepare($insert);
+		$stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
+		//executer la requete
+		$stmt->execute();
+
+		header("Location: http://localhost/AnnonceExpress/index.php");
+	}
+
+	function deleteAnnonce($bdd, $id)
+	{
+		//requete
+		$delete = "delete from annonce where idannonce=?";
+		//preparer la requete
+		$stmt = $bdd->prepare($delete);
+		$stmt->bind_param("i", $id);
+		//executer la requete
+		$stmt->execute();
+	}
+
+	if (isset($_GET['action']) && $_GET['action'] == "suppr") {
+		$id = $_GET['id'];
+		deleteAnnonce($bdd, $id);
+		header("Location: index.php");
+		exit();
+	}
+
+	if (isset($_POST['poster'])) {
+		$titre = $_POST['titre'];
+		$description = $_POST['description'];
+		$prix = $_POST['prix'];
+		$categorie = $_POST['categorie'];
+
+		$photoname = basename($_FILES['photo']['name']);
+		$dossier = 'images/';
+
+		if (!is_dir($dossier)) {
+			mkdir($dossier);
+		}
+
+		$destination = $dossier . $photoname;
+		move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
+
+		insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination);
+		exit();
+	}
+
+	$lesResultats = selectAllAnnonce($bdd);
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,13 +89,13 @@
 		}
 
 		header {
-			background-color: #fff;
+			background: linear-gradient(135deg, #ff6b4a, #ff8f6b);
 			padding: 20px 40px;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+			box-shadow: 0 2px 10px rgba(255,107,74,0.25);
 		}
 
 		header h1 {
-			color: #ff6b4a;
+			color: #fff;
 			font-size: 28px;
 		}
 
@@ -34,6 +105,27 @@
 			padding: 0 20px;
 		}
 
+		.hero {
+			text-align: center;
+			margin-bottom: 25px;
+		}
+
+		.hero p {
+			font-size: 16px;
+			color: #4b5563;
+			margin-bottom: 10px;
+		}
+
+		.badge-count {
+			display: inline-block;
+			background-color: #fff0eb;
+			color: #ff6b4a;
+			padding: 6px 16px;
+			border-radius: 20px;
+			font-size: 13px;
+			font-weight: bold;
+		}
+
 		.formulaire {
 			background-color: #fff;
 			padding: 25px;
@@ -41,6 +133,7 @@
 			box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 			margin-bottom: 30px;
 			border: 1px solid #e5e7eb;
+			border-top: 4px solid #ff6b4a;
 		}
 
 		.formulaire h2 {
@@ -121,6 +214,18 @@
 			background-color: #f0f0f0;
 		}
 
+		.no-photo {
+			width: 100%;
+			height: 180px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			background: linear-gradient(135deg, #ffe0d6, #ffd1c2);
+			color: #ff6b4a;
+			font-size: 14px;
+			font-weight: 500;
+		}
+
 		.carte-info {
 			padding: 15px;
 		}
@@ -191,73 +296,10 @@
 
 	<div class="container">
 
-	<?php
-
-		$bdd = new mysqli("localhost","root","","annonce_express");
-
-		function selectAllAnnonce($bdd)
-		{
-			//requete
-			$select = "select * from annonce";
-			//preparer la requete
-			$stmt = $bdd->prepare($select);
-			//executer la requete
-			$stmt->execute();
-			$lesResultats = $stmt->get_result();
-
-			return $lesResultats;
-		}
-
-		function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
-		{
-			//requete
-			$insert = "insert into annonce values(null,?,?,?,?,?)";
-			//preparer la requete
-			$stmt = $bdd->prepare($insert);
-			$stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
-			//executer la requete
-			$stmt->execute();
-
-			header("Location: http://localhost/AnnonceExpress/index.php");
-		}
-
-		function deleteAnnonce($bdd, $id)
-		{
-			//requete
-			$delete = "delete from annonce where idannonce=?";
-			//preparer la requete
-			$stmt = $bdd->prepare($delete);
-			$stmt->bind_param("i", $id);
-			//executer la requete
-			$stmt->execute();
-		}
-
-		if (isset($_GET['action']) && $_GET['action'] == "suppr") {
-			$id = $_GET['id'];
-			deleteAnnonce($bdd, $id);
-		}
-
-		if (isset($_POST['poster'])) {
-			$titre = $_POST['titre'];
-			$description = $_POST['description'];
-			$prix = $_POST['prix'];
-			$categorie = $_POST['categorie'];
-
-			$photoname = basename($_FILES['photo']['name']);
-			$dossier = 'images/';
-
-			if (!is_dir($dossier)) {
-				mkdir($dossier);
-			}
-
-			$destination = $dossier . $photoname;
-			move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
-
-			insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination);
-			exit();
-		}
-
-	?>
+		<div class="hero">
+			<p>Trouvez ou vendez ce que vous voulez, simplement.</p>
+			<span class="badge-count"><?php echo $lesResultats->num_rows; ?> annonce<?php echo $lesResultats->num_rows > 1 ? 's' : ''; ?> en ligne</span>
+		</div>
 
 		<div class="formulaire">
 			<h2>Poster une annonce</h2>
@@ -277,12 +319,17 @@
 
 		<?php
 
-		$lesResultats = selectAllAnnonce($bdd);
-
 		foreach ($lesResultats as $unResultat) {
+
+			echo '<div class="carte">';
+
+			if (!empty($unResultat["photo"])) {
+				echo '<img src="' . $unResultat["photo"] . '">';
+			} else {
+				echo '<div class="no-photo">Pas de photo</div>';
+			}
+
 			echo '
-			<div class="carte">
-				<img src="' . $unResultat["photo"] . '" onerror="this.style.display=\'none\'">
 				<div class="carte-info">
 					<h3>' . $unResultat["titre"] . '</h3>
 					<p>' . $unResultat["description"] . '</p>
