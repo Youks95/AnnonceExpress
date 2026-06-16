@@ -1,3 +1,49 @@
+<?php
+
+	$bdd = new mysqli("localhost","root","","annonce_express");
+
+	function updateAnnonce($bdd, $id, $titre, $description, $prix, $categorie, $photo)
+	{
+		//requete
+		$update = "update annonce set titre=?,description=?,prix=?,categorie=?,photo=? where idannonce=?";
+		//preparer la requete
+		$stmt = $bdd->prepare($update);
+		$stmt->bind_param("ssdssi", $titre, $description, $prix, $categorie, $photo, $id);
+		//executer la requete
+		$stmt->execute();
+
+		header("Location: index.php");
+		exit();
+	}
+
+	if (isset($_POST['modifier'])) {
+
+		$ancienne_photo = $_POST['ancienne_photo'];
+
+		if (!empty($_FILES['photo']['name'])) {
+			$photoname = basename($_FILES['photo']['name']);
+			$dossier = 'images/';
+
+			if (!is_dir($dossier)) {
+				mkdir($dossier);
+			}
+
+			$destination = $dossier . $photoname;
+			move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
+		} else {
+			$destination = $ancienne_photo;
+		}
+
+		$id = $_GET['id'];
+		$titre = $_POST['titre'];
+		$description = $_POST['description'];
+		$prix = $_POST['prix'];
+		$categorie = $_POST['categorie'];
+
+		updateAnnonce($bdd, $id, $titre, $description, $prix, $categorie, $destination);
+	}
+
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,13 +64,13 @@
 		}
 
 		header {
-			background-color: #fff;
+			background: linear-gradient(135deg, #ff6b4a, #ff8f6b);
 			padding: 20px 40px;
-			box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+			box-shadow: 0 2px 10px rgba(255,107,74,0.25);
 		}
 
 		header h1 {
-			color: #ff6b4a;
+			color: #fff;
 			font-size: 28px;
 		}
 
@@ -150,52 +196,6 @@
 		</div>
 
 	</div>
-
-	<?php
-
-		$bdd = new mysqli("localhost","root","","annonce_express");
-
-		function updateAnnonce($bdd, $id, $titre, $description, $prix, $categorie, $photo)
-		{
-			//requete
-			$update = "update annonce set titre=?,description=?,prix=?,categorie=?,photo=? where idannonce=?";
-			//preparer la requete
-			$stmt = $bdd->prepare($update);
-			$stmt->bind_param("ssdssi", $titre, $description, $prix, $categorie, $photo, $id);
-			//executer la requete
-			$stmt->execute();
-
-			header("Location: index.php");
-		}
-
-		if (isset($_POST['modifier'])) {
-
-			$ancienne_photo = $_POST['ancienne_photo'];
-
-			if (!empty($_FILES['photo']['name'])) {
-				$photoname = basename($_FILES['photo']['name']);
-				$dossier = 'images/';
-
-				if (!is_dir($dossier)) {
-					mkdir($dossier);
-				}
-
-				$destination = $dossier . $photoname;
-				move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
-			} else {
-				$destination = $ancienne_photo;
-			}
-
-			$id = $_GET['id'];
-			$titre = $_POST['titre'];
-			$description = $_POST['description'];
-			$prix = $_POST['prix'];
-			$categorie = $_POST['categorie'];
-
-			updateAnnonce($bdd, $id, $titre, $description, $prix, $categorie, $destination);
-		}
-
-	?>
 
 </body>
 </html>
