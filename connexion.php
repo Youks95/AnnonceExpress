@@ -130,6 +130,7 @@
 			font-size: 15px;
 			font-weight: bold;
 			width: 100%;
+			margin-bottom: 12px;
 		}
 
 		.formulaire input[type="submit"]:hover {
@@ -143,6 +144,21 @@
 			border-radius: 6px;
 			font-size: 13px;
 			margin-bottom: 14px;
+		}
+
+		.lien-inscription {
+			text-align: center;
+			font-size: 13px;
+			color: #6b7280;
+		}
+
+		.lien-inscription a {
+			color: #ff6b4a;
+			text-decoration: none;
+		}
+
+		.lien-inscription a:hover {
+			text-decoration: underline;
 		}
 	</style>
 </head>
@@ -165,6 +181,10 @@
 
 			<input type="submit" name="connexion" value="Se connecter">
 		</form>
+
+		<div class="lien-inscription">
+			Pas encore de compte ? <a href="inscription.php">S'inscrire</a>
+		</div>
 	</div>
 
 </body>
