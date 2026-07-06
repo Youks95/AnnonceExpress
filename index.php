@@ -1,6 +1,19 @@
 <?php
 
+// ========== SESSION ==========
+
+	session_start();
+
+	if (!isset($_SESSION['iduser'])) {
+		header("Location: connexion.php");
+		exit();
+	}
+
+// ========== CONNEXION BDD ==========
+
 	$bdd = new mysqli("localhost","root","","annonce_express");
+
+// ========== FONCTIONS ==========
 
 	function selectAllAnnonce($bdd)
 	{
@@ -15,13 +28,27 @@
 		return $lesResultats;
 	}
 
-	function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo)
+	function selectMesAnnonces($bdd, $iduser)
 	{
 		//requete
-		$insert = "insert into annonce values(null,?,?,?,?,?)";
+		$select = "select * from annonce where iduser=?";
+		//preparer la requete
+		$stmt = $bdd->prepare($select);
+		$stmt->bind_param("i", $iduser);
+		//executer la requete
+		$stmt->execute();
+		$lesResultats = $stmt->get_result();
+
+		return $lesResultats;
+	}
+
+	function insertAnnonce($bdd, $titre, $description, $prix, $categorie, $photo, $iduser)
+	{
+		//requete
+		$insert = "insert into annonce values(null,?,?,?,?,?,?)";
 		//preparer la requete
 		$stmt = $bdd->prepare($insert);
-		$stmt->bind_param("ssdss", $titre, $description, $prix, $categorie, $photo);
+		$stmt->bind_param("ssdssi", $titre, $description, $prix, $categorie, $photo, $iduser);
 		//executer la requete
 		$stmt->execute();
 
@@ -39,37 +66,46 @@
 		$stmt->execute();
 	}
 
+// ========== ACTIONS ==========
+
 	if (isset($_GET['action']) && $_GET['action'] == "suppr") {
 		$id = $_GET['id'];
-		deleteAnnonce($bdd, $id);
+		$iduser_annonce = $_GET['iduser'];
+
+		if ($_SESSION['role'] == 'admin' || $_SESSION['iduser'] == $iduser_annonce) {
+			deleteAnnonce($bdd, $id);
+		}
+
 		header("Location: index.php");
 		exit();
 	}
 
 	if (isset($_POST['poster'])) {
-	$titre = $_POST['titre'];
-	$description = $_POST['description'];
-	$prix = $_POST['prix'];
-	$categorie = $_POST['categorie'];
+		$titre = $_POST['titre'];
+		$description = $_POST['description'];
+		$prix = $_POST['prix'];
+		$categorie = $_POST['categorie'];
 
-	if (!empty($_FILES['photo']['name'])) {
-		$photoname = basename($_FILES['photo']['name']);
-		$dossier = 'images/';
+		if (!empty($_FILES['photo']['name'])) {
+			$photoname = basename($_FILES['photo']['name']);
+			$dossier = 'images/';
 
-		if (!is_dir($dossier)) {
-			mkdir($dossier);
+			if (!is_dir($dossier)) {
+				mkdir($dossier);
+			}
+
+			$destination = $dossier . $photoname;
+			move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
+		} else {
+			$destination = null;
 		}
 
-		$destination = $dossier . $photoname;
-		move_uploaded_file($_FILES['photo']['tmp_name'], $destination);
-	} else {
-		$destination = null;
+		insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination, $_SESSION['iduser']);
+		exit();
 	}
 
-	insertAnnonce($bdd, $titre, $description, $prix, $categorie, $destination);
-	exit();
-}
 	$lesResultats = selectAllAnnonce($bdd);
+	$mesAnnonces = selectMesAnnonces($bdd, $_SESSION['iduser']);
 
 ?>
 <!DOCTYPE html>
@@ -78,6 +114,8 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>AnnonceExpress</title>
+
+	<!-- ========== CSS ========== -->
 	<style>
 		* {
 			margin: 0;
@@ -94,12 +132,39 @@
 		header {
 			background: linear-gradient(135deg, #ff6b4a, #ff8f6b);
 			padding: 20px 40px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
 			box-shadow: 0 2px 10px rgba(255,107,74,0.25);
 		}
 
 		header h1 {
 			color: #fff;
 			font-size: 28px;
+		}
+
+		.header-droite {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.header-droite span {
+			color: #fff;
+			font-size: 14px;
+		}
+
+		.btn-deconnexion {
+			background-color: rgba(255,255,255,0.2);
+			color: #fff;
+			padding: 7px 14px;
+			border-radius: 6px;
+			text-decoration: none;
+			font-size: 13px;
+		}
+
+		.btn-deconnexion:hover {
+			background-color: rgba(255,255,255,0.35);
 		}
 
 		.container {
@@ -191,6 +256,12 @@
 			font-size: 20px;
 		}
 
+		.separateur {
+			border: none;
+			border-top: 2px solid #e5e7eb;
+			margin: 40px 0;
+		}
+
 		.grille {
 			display: grid;
 			grid-template-columns: repeat(3, 1fr);
@@ -213,8 +284,9 @@
 		.carte img {
 			width: 100%;
 			height: 180px;
-			object-fit: cover;
-			background-color: #f0f0f0;
+			object-fit: contain;
+			background-color: #f5f5f5;
+			padding: 10px;
 		}
 
 		.no-photo {
@@ -289,14 +361,25 @@
 
 		.btn-suppr:hover { background-color: #fecaca; }
 		.btn-modif:hover { background-color: #bfdbfe; }
+
+		.aucune-annonce {
+			color: #6b7280;
+			font-size: 14px;
+			margin-bottom: 20px;
+		}
 	</style>
 </head>
 <body>
 
 	<header>
 		<h1>AnnonceExpress</h1>
+		<div class="header-droite">
+			<span>Bonjour, <?php echo $_SESSION['pseudo']; ?></span>
+			<a class="btn-deconnexion" href="deconnexion.php">Se déconnecter</a>
+		</div>
 	</header>
 
+	<!-- ========== HTML ========== -->
 	<div class="container">
 
 		<div class="hero">
@@ -317,12 +400,14 @@
 			</form>
 		</div>
 
-		<h2 class="titre-liste">Les annonces</h2>
+		<h2 class="titre-liste">Mes annonces</h2>
+
+		<?php if ($mesAnnonces->num_rows == 0) { ?>
+			<p class="aucune-annonce">Vous n'avez pas encore posté d'annonce.</p>
+		<?php } else { ?>
 		<div class="grille">
-
 		<?php
-
-		foreach ($lesResultats as $unResultat) {
+		foreach ($mesAnnonces as $unResultat) {
 
 			echo '<div class="carte">';
 
@@ -340,15 +425,54 @@
 					<span class="categorie">' . $unResultat["categorie"] . '</span>
 				</div>
 				<div class="carte-actions">
-					<a class="btn-suppr" href="index.php?action=suppr&id=' . $unResultat["idannonce"] . '">Supprimer</a>
+					<a class="btn-suppr" href="index.php?action=suppr&id=' . $unResultat["idannonce"] . '&iduser=' . $unResultat["iduser"] . '">Supprimer</a>
 					<a class="btn-modif" href="modifier.php?action=modif&id=' . $unResultat["idannonce"] . '&titre=' . $unResultat["titre"] . '&description=' . $unResultat["description"] . '&prix=' . $unResultat["prix"] . '&categorie=' . $unResultat["categorie"] . '&photo=' . $unResultat["photo"] . '">Modifier</a>
 				</div>
 			</div>';
 		}
+		?>
+		</div>
+		<?php } ?>
 
+		<hr class="separateur">
+
+		<h2 class="titre-liste">Les annonces</h2>
+		<div class="grille">
+
+		<?php
+		foreach ($lesResultats as $unResultat) {
+
+			echo '<div class="carte">';
+
+			if (!empty($unResultat["photo"])) {
+				echo '<img src="' . $unResultat["photo"] . '">';
+			} else {
+				echo '<div class="no-photo">Pas de photo</div>';
+			}
+
+			echo '
+				<div class="carte-info">
+					<h3>' . $unResultat["titre"] . '</h3>
+					<p>' . $unResultat["description"] . '</p>
+					<div class="prix">' . $unResultat["prix"] . ' €</div>
+					<span class="categorie">' . $unResultat["categorie"] . '</span>
+				</div>
+				<div class="carte-actions">';
+
+			if ($_SESSION['role'] == 'admin' || $_SESSION['iduser'] == $unResultat['iduser']) {
+				echo '
+					<a class="btn-suppr" href="index.php?action=suppr&id=' . $unResultat["idannonce"] . '&iduser=' . $unResultat["iduser"] . '">Supprimer</a>
+					<a class="btn-modif" href="modifier.php?action=modif&id=' . $unResultat["idannonce"] . '&titre=' . $unResultat["titre"] . '&description=' . $unResultat["description"] . '&prix=' . $unResultat["prix"] . '&categorie=' . $unResultat["categorie"] . '&photo=' . $unResultat["photo"] . '">Modifier</a>';
+			}
+
+			echo '
+				</div>
+			</div>';
+		}
 		?>
 
 		</div>
+
 	</div>
 
 </body>
