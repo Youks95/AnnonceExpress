@@ -15,12 +15,13 @@
 
 // ========== FONCTIONS ==========
 
-	function selectAllAnnonce($bdd)
+	function selectAllAnnonce($bdd, $iduser)
 	{
 		//requete
-		$select = "select * from annonce";
+		$select = "select * from annonce where iduser != ?";
 		//preparer la requete
 		$stmt = $bdd->prepare($select);
+		$stmt->bind_param("i", $iduser);
 		//executer la requete
 		$stmt->execute();
 		$lesResultats = $stmt->get_result();
@@ -104,7 +105,7 @@
 		exit();
 	}
 
-	$lesResultats = selectAllAnnonce($bdd);
+	$lesResultats = selectAllAnnonce($bdd, $_SESSION['iduser']);
 	$mesAnnonces = selectMesAnnonces($bdd, $_SESSION['iduser']);
 
 ?>
@@ -437,8 +438,11 @@
 		<hr class="separateur">
 
 		<h2 class="titre-liste">Les annonces</h2>
-		<div class="grille">
 
+		<?php if ($lesResultats->num_rows == 0) { ?>
+			<p class="aucune-annonce">Aucune autre annonce disponible.</p>
+		<?php } else { ?>
+		<div class="grille">
 		<?php
 		foreach ($lesResultats as $unResultat) {
 
@@ -459,7 +463,7 @@
 				</div>
 				<div class="carte-actions">';
 
-			if ($_SESSION['role'] == 'admin' || $_SESSION['iduser'] == $unResultat['iduser']) {
+			if ($_SESSION['role'] == 'admin') {
 				echo '
 					<a class="btn-suppr" href="index.php?action=suppr&id=' . $unResultat["idannonce"] . '&iduser=' . $unResultat["iduser"] . '">Supprimer</a>
 					<a class="btn-modif" href="modifier.php?action=modif&id=' . $unResultat["idannonce"] . '&titre=' . $unResultat["titre"] . '&description=' . $unResultat["description"] . '&prix=' . $unResultat["prix"] . '&categorie=' . $unResultat["categorie"] . '&photo=' . $unResultat["photo"] . '">Modifier</a>';
@@ -470,8 +474,8 @@
 			</div>';
 		}
 		?>
-
 		</div>
+		<?php } ?>
 
 	</div>
 
